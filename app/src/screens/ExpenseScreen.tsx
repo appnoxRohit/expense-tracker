@@ -27,8 +27,8 @@ const ExpensePage = () => {
   ];
 
   const handleAddExpense = () => {
-    if (!amount || !category) {
-      alert('Please enter both amount and category');
+    if (!amount || !category || !description) {
+      alert('Please enter both amount and category and description');
       return;
     }
     const newTransaction = {
@@ -70,6 +70,7 @@ const ExpensePage = () => {
             </TouchableOpacity>
           ))}
         </View>
+        
       </View>
     </Modal>
   );

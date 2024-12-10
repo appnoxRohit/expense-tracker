@@ -14,12 +14,13 @@ const transactionSlice = createSlice({
     addTransaction: (state, action) => {
       const transaction = action.payload;
       state.transactions.push(transaction);
+      
 
       if (transaction.type === 'income') {
         state.income += transaction.amount;
         state.balance += transaction.amount;
       } else if (transaction.type === 'expense') {
-        state.expense += transaction.amount;
+        state.expense -= transaction.amount;
         state.balance -= transaction.amount;
       }
     },

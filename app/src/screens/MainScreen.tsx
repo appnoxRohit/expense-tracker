@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,13 +6,14 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
+  Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { ProgressChart} from "react-native-chart-kit";
+import { ProgressChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import { router } from "expo-router";
+import { clearTransactions } from "../store/Slices/TransactionSlice";
 
 const Home = () => {
   const navigation = useNavigation();
@@ -20,16 +21,17 @@ const Home = () => {
   const { balance, income, expense } = useSelector(
     (state: any) => state.transaction
   );
+  console.log('Balance:',balance,'Income:',income,'Expense:',expense); 
 
-  console.log("balance:", balance, income, expense);
+  const Transactions = useSelector((state) => state.transaction.transactions);
 
-  const totalBalance = 10000;
-  let peiBalance = (balance / totalBalance) ;
-  let peiExpense = 1000;
+  const totalBalance = 1000;
+  let peiBalance = balance / totalBalance / 10;
+  let peiExpense = 2/10;
 
   const data = {
-    labels: ["Balance", "Expense", ],
-    data: [peiBalance, peiExpense, ],
+    labels: ["Balance", "Expense"],
+    data: [peiBalance, peiExpense],
   };
 
   const chartConfig = {
@@ -44,11 +46,20 @@ const Home = () => {
   };
   const screenWidth = Dimensions.get("window").width;
 
-  const recentTransactions = [
-    { id: 1, title: "Grocery Shopping", amount: -85.5, date: "2024-02-15" },
-    { id: 2, title: "Salary", amount: 3200.0, date: "2024-02-10" },
-    { id: 3, title: "Dining Out", amount: -45.75, date: "2024-02-12" },
-  ];
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const handleReset = () => {
+    setIsModalVisible(true); 
+  };
+
+  const handleConfirmReset = () => {
+    dispatch(clearTransactions());
+    setIsModalVisible(false); 
+  };
+
+  const handleCancelReset = () => {
+    setIsModalVisible(false); 
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -58,7 +69,6 @@ const Home = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.balanceContainer}>
-            {/* <Text style={styles.balanceLabel}>Total Balance</Text> */}
             <ProgressChart
               data={data}
               width={screenWidth}
@@ -68,7 +78,6 @@ const Home = () => {
               chartConfig={chartConfig}
               hideLegend={false}
             />
-
             <Text style={styles.balanceAmount}>₹{balance}</Text>
           </View>
 
@@ -79,26 +88,34 @@ const Home = () => {
             >
               <Text style={styles.actionButtonText}>Add Expense/Income</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Add Income</Text>
-            </TouchableOpacity> */}
+
+            <TouchableOpacity style={styles.actionButton} onPress={handleReset}>
+              <Text style={styles.deleteBtn}>Reset App</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.transactionsContainer}>
             <Text style={styles.sectionTitle}>Recent Transactions</Text>
-            {recentTransactions.map((transaction) => (
-              <View key={transaction.id} style={styles.transactionItem}>
-                <Text style={styles.transactionTitle}>{transaction.title}</Text>
+            {Transactions.slice(-3).reverse().map((transaction) => (      
+               <View key={transaction.id} style={styles.transactionItem}>
+                <View>
+                  <Text style={styles.transactionTitle}>
+                    {transaction.description}
+                  </Text>
+                  <Text style={{ color: "grey", fontSize: 10 }}>
+                    {new Date(transaction.date).toISOString().slice(0, 10)}
+                  </Text>
+                </View>
                 <Text
                   style={[
                     styles.transactionAmount,
-                    transaction.amount < 0
+                    transaction.category === 'expense'
                       ? styles.expenseText
                       : styles.incomeText,
                   ]}
                 >
-                  {transaction.amount > 0 ? "+" : ""}$
-                  {Math.abs(transaction.amount).toLocaleString()}
+                  {transaction.category === 'income'? "+" : "-"}
+                  ₹{Math.abs(transaction.amount).toLocaleString()}
                 </Text>
               </View>
             ))}
@@ -108,6 +125,28 @@ const Home = () => {
           </View>
         </ScrollView>
       </LinearGradient>
+
+      {/* Confirmation Modal */}
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCancelReset} 
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Are you sure you want to reset?</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={handleCancelReset}>
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleConfirmReset}>
+                <Text style={styles.modalConfirmText}>Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -126,11 +165,6 @@ const styles = StyleSheet.create({
   balanceContainer: {
     alignItems: "center",
     marginBottom: 30,
-  },
-  balanceLabel: {
-    color: "rgba(255,255,255,0.7)",
-    fontSize: 16,
-    marginBottom: 10,
   },
   balanceAmount: {
     color: "white",
@@ -151,6 +185,10 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: "white",
+    fontWeight: "bold",
+  },
+  deleteBtn: {
+    color: "black",
     fontWeight: "bold",
   },
   transactionsContainer: {
@@ -189,6 +227,38 @@ const styles = StyleSheet.create({
   },
   seeAllButtonText: {
     color: "#169e1d",
+    fontWeight: "bold",
+  },
+
+  
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+  },
+  modalCancelText: {
+    color: "red",
+    fontWeight: "bold",
+  },
+  modalConfirmText: {
+    color: "green",
     fontWeight: "bold",
   },
 });
