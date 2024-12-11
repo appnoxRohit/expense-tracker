@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   addButtonText: {
-    color: 'white',
+    color: 'black',
     fontWeight: 'bold',
   },
   scrollContent: {

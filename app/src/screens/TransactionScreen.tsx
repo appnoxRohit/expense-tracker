@@ -17,12 +17,12 @@ const TransactionsPage = () => {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const dispatch = useDispatch();
   const transactions = useSelector((state) => state.transaction.transactions);
+  console.log(transactions);
   
 
   const filters = ["All", "income", "expense"];
 
-  // Memoizing filtered transactions to optimize re-renders
-  const filteredTransactions = useMemo(() => {
+    const filteredTransactions = useMemo(() => {
     return transactions.filter((transaction) => {
       if (selectedFilter === "All") return true;
       if (selectedFilter === "income") return transaction.category === "income";
@@ -30,6 +30,7 @@ const TransactionsPage = () => {
         return transaction.category === "expense";
     });
   }, [transactions, selectedFilter]);
+  console.log(filteredTransactions)
 
   const renderFilterModal = () => (
     <Modal
@@ -81,36 +82,47 @@ const TransactionsPage = () => {
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContent}>
-        {transactions ? <View style={styles.transactionsContainer2}><Text>Sorry Nothing To Show !</Text></View>: <><View style={styles.transactionsContainer}>
-            {filteredTransactions.map((transaction) => (
-              <TouchableOpacity
-                key={transaction.id}
-                style={styles.transactionItem}
-              >
-                <View style={styles.transactionDetails}>
-                  <Text style={styles.transactionTitle}>
-                    {transaction.description}
-                  </Text>
-                  <Text style={styles.transactionCategory}>
-                    {transaction.category}
-                  </Text>
-                  <Text style={styles.transactionDate}>{transaction.date}</Text>
-                </View>
-                <Text
-                  style={[
-                    styles.transactionAmount,
-                    transaction.category === "expense"
-                      ? styles.expenseText
-                      : styles.incomeText,
-                  ]}
-                >
-                  {transaction.category === "income" ? "+" : "-"}$
-                  {Math.abs(transaction.amount).toLocaleString()}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View></>}
-          
+          {transactions ?  (
+            <>
+              <View style={styles.transactionsContainer}>
+                {filteredTransactions.map((transaction) => (
+                  <TouchableOpacity
+                    key={transaction.id}
+                    style={styles.transactionItem}
+                  >
+                    <View style={styles.transactionDetails}>
+                      <Text style={styles.transactionTitle}>
+                        {transaction.description}
+                      </Text>
+                      <Text style={styles.transactionCategory}>
+                        {transaction.category}
+                      </Text>
+                      <Text style={styles.transactionDate}>
+                        {transaction.date}
+                      </Text>
+                    </View>
+                    <Text
+                      style={[
+                        styles.transactionAmount,
+                        transaction.category === "expense"
+                          ? styles.expenseText
+                          : styles.incomeText,
+                      ]}
+                    >
+                      {transaction.category === "income" ? "+" : "-"}$
+                      {Math.abs(transaction.amount).toLocaleString()}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </>):
+            (
+            <View style={styles.transactionsContainer2}>
+              <Text>Sorry Nothing To Show !</Text>
+            </View>
+          ) 
+          }
+
           <TouchableOpacity onPress={handleClearTransactions}>
             <View style={styles.clearBtn}>
               <Text style={{ color: "red", fontWeight: "500" }}>
@@ -150,13 +162,12 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 15,
   },
-  transactionsContainer2:{
+  transactionsContainer2: {
     backgroundColor: "white",
     borderRadius: 15,
     padding: 25,
-    alignContent:"center",
-    alignItems:"center"
-
+    alignContent: "center",
+    alignItems: "center",
   },
 
   transactionItem: {
@@ -206,7 +217,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 15,
     alignItems: "center",
-    justifyContent:"center",
+    justifyContent: "center",
     height: 45,
   },
 });

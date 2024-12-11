@@ -14,8 +14,6 @@ const transactionSlice = createSlice({
     addTransaction: (state, action) => {
       const transaction = action.payload;
       state.transactions.push(transaction);
-      
-
       if (transaction.type === 'income') {
         state.income += transaction.amount;
         state.balance += transaction.amount;
@@ -25,9 +23,22 @@ const transactionSlice = createSlice({
       }
     },
     deleteTransaction: (state, action) => {
-      const transactionId = action.payload;
-      state.transactions = state.transactions.filter(t => t.id !== transactionId);
+      const { id, category } = action.payload;
+      const transactionToDelete = state.transactions.find(transaction => transaction.id === id);
+    
+      if (transactionToDelete) {
+        state.transactions = state.transactions.filter(transaction => transaction.id !== id);
+    
+        if (category === 'income') {
+          state.income -= transactionToDelete.amount; 
+          state.balance -= transactionToDelete.amount; 
+        } else if (category === 'expense') {
+          state.expense += transactionToDelete.amount; 
+          state.balance += transactionToDelete.amount; 
+        }
+      }
     },
+    
     clearTransactions: (state) => {
       state.transactions = [];
       state.income = 0;

@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DrawerNavigator from "./DrawerNavigator";
 import SettingScreen from "../screens/SettingScreen";
 import ExpenseScreen from "../screens/ExpenseScreen";
+import MainScreen from "../screens/MainScreen";
 import {
   createNavigationContainerRef,
   NavigationContainer,
@@ -22,6 +23,7 @@ export default function StackNavigator() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Drawer" component={DrawerNavigator} />
           <Stack.Screen name="Settings" component={SettingScreen} />
+          {/* <Stack.Screen name="Home" component={MainScreen} /> */}
           <Stack.Screen name="ExpenseScreen" component={ExpenseScreen} />
         </Stack.Navigator>
         {/* </NavigationContainer> */}

@@ -1,48 +1,42 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  balance: 0,
-  transactions: [],
-  income: 0,
-  expense: 0,
+  goals: [],
 };
 
-const transactionSlice = createSlice({
-  name: 'transaction',
+const goalSlice = createSlice({
+  name: 'goal',
   initialState,
   reducers: {
-    addTransaction: (state, action) => {
-      const { type, amount } = action.payload;
-      state.transactions.push(action.payload);
-      if (type === 'income') {
-        state.income += amount;
-        state.balance += amount;
-      } else if (type === 'expense') {
-        state.expense += amount;
-        state.balance -= amount;
+    addGoal: (state, action) => {
+      const goal = action.payload; 
+      state.goals.push(goal);
+    },
+    updateGoal: (state, action) => {
+      const { id, updatedData } = action.payload; 
+      const goalIndex = state.goals.findIndex(goal => goal.id === id);
+      if (goalIndex !== -1) {
+        state.goals[goalIndex] = { ...state.goals[goalIndex], ...updatedData };
       }
     },
-    deleteTransaction: (state, action) => {
-      const transactionId = action.payload;
-      const transaction = state.transactions.find(t => t.id === transactionId);
-      if (transaction.type === 'income') {
-        state.income -= transaction.amount;
-        state.balance -= transaction.amount;
-      } else if (transaction.type === 'expense') {
-        state.expense -= transaction.amount;
-        state.balance += transaction.amount;
-      }
-      state.transactions = state.transactions.filter(t => t.id !== transactionId);
+    deleteGoal: (state, action) => {
+      const goalId = action.payload; 
+      state.goals = state.goals.filter(goal => goal.id !== goalId);
     },
-    clearTransactions: (state) => {
-      state.transactions = [];
-      state.income = 0;
-      state.expense = 0;
-      state.balance = 0;
+    updateProgress: (state, action) => {
+      const { id, currentAmount } = action.payload; 
+      const goalIndex = state.goals.findIndex(goal => goal.id === id);
+      if (goalIndex !== -1) {
+        state.goals[goalIndex].currentAmount = currentAmount;
+        state.goals[goalIndex].progress = currentAmount / state.goals[goalIndex].targetAmount;
+      }
+    },
+    clearGoals: (state) => {
+      state.goals = [];
     },
   },
 });
 
-export const { addTransaction, deleteTransaction, clearTransactions } = transactionSlice.actions;
+export const { addGoal, updateGoal, deleteGoal, updateProgress, clearGoals } = goalSlice.actions;
 
-export default transactionSlice.reducer;
+export default goalSlice.reducer;

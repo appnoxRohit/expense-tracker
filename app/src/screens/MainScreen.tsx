@@ -13,7 +13,8 @@ import { ProgressChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import { clearTransactions } from "../store/Slices/TransactionSlice";
+import { clearTransactions, deleteTransaction } from "../store/Slices/TransactionSlice";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const Home = () => {
   const navigation = useNavigation();
@@ -21,13 +22,21 @@ const Home = () => {
   const { balance, income, expense } = useSelector(
     (state: any) => state.transaction
   );
-  console.log('Balance:',balance,'Income:',income,'Expense:',expense); 
+  console.log("Balance:", balance, "Income:", income, "Expense:", expense);
+  
+  const handleDelete = (id,category) => {
+    // console.log(category)
+      // console.log("all three",id,category,Transactions)
+    dispatch(deleteTransaction({id,category,Transactions}))
+
+  }
 
   const Transactions = useSelector((state) => state.transaction.transactions);
 
-  const totalBalance = 1000;
-  let peiBalance = balance / totalBalance / 10;
-  let peiExpense = 2/10;
+
+  const totalBalance = 50000;
+  let peiBalance = balance / totalBalance;
+  let peiExpense = -expense / totalBalance;
 
   const data = {
     labels: ["Balance", "Expense"],
@@ -49,16 +58,16 @@ const Home = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const handleReset = () => {
-    setIsModalVisible(true); 
+    setIsModalVisible(true);
   };
 
   const handleConfirmReset = () => {
     dispatch(clearTransactions());
-    setIsModalVisible(false); 
+    setIsModalVisible(false);
   };
 
   const handleCancelReset = () => {
-    setIsModalVisible(false); 
+    setIsModalVisible(false);
   };
 
   return (
@@ -90,35 +99,44 @@ const Home = () => {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionButton} onPress={handleReset}>
-              <Text style={styles.deleteBtn}>Reset App</Text>
+              <Text style={styles.deleteBtn}>Reset Balance</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.transactionsContainer}>
             <Text style={styles.sectionTitle}>Recent Transactions</Text>
-            {Transactions.slice(-3).reverse().map((transaction) => (      
-               <View key={transaction.id} style={styles.transactionItem}>
-                <View>
-                  <Text style={styles.transactionTitle}>
-                    {transaction.description}
-                  </Text>
-                  <Text style={{ color: "grey", fontSize: 10 }}>
-                    {new Date(transaction.date).toISOString().slice(0, 10)}
-                  </Text>
+            {Transactions.slice(-4)
+              .reverse()
+              .map((transaction) => (
+                <View key={transaction.id} style={styles.transactionItem}>
+                  <View>
+                    <Text style={styles.transactionTitle}>
+                      {transaction.description}
+                    </Text>
+                    <Text style={{ color: "grey", fontSize: 10, gap: 10 }}>
+                      {new Date(transaction.date).toISOString().slice(0, 10)}
+                    </Text>
+                  </View>
+                  <View
+                    style={{  flexDirection: "row",gap:15 }}
+                  >
+                    <Text
+                      style={[
+                        styles.transactionAmount,
+                        transaction.category === "expense"
+                          ? styles.expenseText
+                          : styles.incomeText,
+                      ]}
+                    >
+                      {transaction.category === "income" ? "+" : "-"}₹
+                      {Math.abs(transaction.amount).toLocaleString()}
+                    </Text>
+                    <TouchableOpacity onPress={()=>handleDelete(transaction.id,transaction.category)}>
+                      <AntDesign name="delete" size={18} color="black" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-                <Text
-                  style={[
-                    styles.transactionAmount,
-                    transaction.category === 'expense'
-                      ? styles.expenseText
-                      : styles.incomeText,
-                  ]}
-                >
-                  {transaction.category === 'income'? "+" : "-"}
-                  ₹{Math.abs(transaction.amount).toLocaleString()}
-                </Text>
-              </View>
-            ))}
+              ))}
             <TouchableOpacity style={styles.seeAllButton}>
               <Text style={styles.seeAllButtonText}>See All Transactions</Text>
             </TouchableOpacity>
@@ -131,11 +149,13 @@ const Home = () => {
         visible={isModalVisible}
         transparent={true}
         animationType="fade"
-        onRequestClose={handleCancelReset} 
+        onRequestClose={handleCancelReset}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalText}>Are you sure you want to reset?</Text>
+            <Text style={styles.modalText}>
+              Are you sure you want to reset?
+            </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity onPress={handleCancelReset}>
                 <Text style={styles.modalCancelText}>Cancel</Text>
@@ -230,7 +250,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 
-  
   modalContainer: {
     flex: 1,
     justifyContent: "center",

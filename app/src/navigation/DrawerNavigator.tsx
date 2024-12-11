@@ -27,7 +27,7 @@ function CustomDrawerContent(props: any) {
           source={require("../../../assets/images/userImage.png")}
           style={styles.profileImage}
         />
-        <Text style={styles.userName}>User Name</Text>
+        <Text style={styles.userName}>Rohit Bisht</Text>
         <Text style={styles.userEmail}>User.email@example.com</Text>
       </View>
 
@@ -98,7 +98,7 @@ export default function DrawerNavigator() {
         component={SettingScreen}
       />
       <Drawer.Screen
-        name="Homess"
+        name="Home"
         options={{ headerShown: true }}
         component={SettingScreen}
       />
