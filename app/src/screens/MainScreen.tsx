@@ -107,7 +107,7 @@ const Home = () => {
             <Text style={styles.sectionTitle}>Recent Transactions</Text>
             {Transactions.slice(-4)
               .reverse()
-              .map((transaction) => (
+              .map((transaction:any) => (
                 <View key={transaction.id} style={styles.transactionItem}>
                   <View>
                     <Text style={styles.transactionTitle}>

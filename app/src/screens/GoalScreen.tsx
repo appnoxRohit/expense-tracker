@@ -29,7 +29,7 @@ const GoalsPage = () => {
       name: 'Vacation Trip', 
       currentAmount: 500, 
       targetAmount: 3000,
-      progress: 0.17 
+      progress: 0.02 
     },
     { 
       id: 3, 
@@ -122,7 +122,7 @@ const GoalsPage = () => {
                 <View style={styles.goalHeader}>
                   <Text style={styles.goalName}>{goal.name}</Text>
                   <Text style={styles.goalAmount}>
-                    ${goal.currentAmount.toLocaleString()} / ${goal.targetAmount.toLocaleString()}
+                  ₹{goal.currentAmount.toLocaleString()} / ₹{goal.targetAmount.toLocaleString()}
                   </Text>
                 </View>
                 <View style={styles.progressBarContainer}>
